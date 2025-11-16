@@ -75,7 +75,16 @@ export default function ChatInterface() {
         }),
       })
 
-      if (!response.ok) throw new Error("Translation failed")
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        
+        if (response.status === 429 || errorData.isRateLimit) {
+          alert("⏳ Translation is temporarily unavailable due to high usage. Please try again in a minute.")
+        } else {
+          alert("❌ Translation failed. Please try again later.")
+        }
+        return
+      }
 
       const data = await response.json()
 
@@ -92,6 +101,7 @@ export default function ChatInterface() {
       )
     } catch (error) {
       console.error("Translation error:", error)
+      alert("❌ Translation failed. Please check your internet connection.")
     } finally {
       setTranslatingId(null)
     }
